@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>macOS Style Desktop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Desktop Background */
+        .desktop {
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: url('https://images.unsplash.com/photo-1636955816868-fcb881e57954?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        /* Top Menu Bar */
+        .menu-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-size: 13px;
+            color: #333;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10000;
+        }
+
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .apple-logo {
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .menu-item {
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .time {
+            font-weight: 500;
+        }
+
+        /* Dock */
+        .dock {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 8px;
+            display: flex;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 9999;
+        }
+
+        .dock-item {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s, margin 0.2s;
+            font-size: 24px;
+        }
+
+        .dock-item:hover {
+            transform: translateY(-10px) scale(1.2);
+            margin: 0 5px;
+        }
+
+        /* Window Styles */
+        .window {
+            position: absolute;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            min-width: 400px;
+            min-height: 300px;
+            overflow: hidden;
+            resize: both;
+        }
+
+        .window.active {
+            z-index: 1000;
+        }
+
+        .window-header {
+            background: linear-gradient(180deg, #f6f6f6 0%, #e8e8e8 100%);
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            cursor: move;
+            user-select: none;
+            border-bottom: 1px solid #d1d1d1;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .window-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .window-btn.close {
+            background: #ff5f57;
+            border: 1px solid #e0443e;
+        }
+
+        .window-btn.minimize {
+            background: #ffbd2e;
+            border: 1px solid #dea123;
+        }
+
+        .window-btn.maximize {
+            background: #27c93f;
+            border: 1px solid #1aab29;
+        }
+
+        .window-btn:hover::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+
+        .window-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .window-content {
+            height: calc(100% - 38px);
+            width: 100%;
+            background: white;
+        }
+
+        .window-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Minimized window */
+        .window.minimized {
+            display: none;
+        }
+
+        /* Maximized window */
+        .window.maximized {
+            top: 28px !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 28px) !important;
+            border-radius: 0;
+        }
+
+        /* App Icons */
+        .app-icon {
+            position: absolute;
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .app-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .app-icon-img {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 15px;
+            margin: 0 auto 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-icon-label {
+            font-size: 12px;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 8px;
+            padding: 5px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 10001;
+            min-width: 180px;
+        }
+
+        .context-menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .context-menu-item:hover {
+            background: #007AFF;
+            color: white;
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .loading::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007AFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Desktop -->
+    <div class="desktop" id="desktop">
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="menu-left">
+                <span class="apple-logo">🍎</span>
+                <span class="menu-item">Finder</span>
+                <span class="menu-item">File</span>
+                <span class="menu-item">Edit</span>
+                <span class="menu-item">View</span>
+                <span class="menu-item">Window</span>
+                <span class="menu-item">Help</span>
+            </div>
+            <div class="menu-right">
+                <span>🔋 100%</span>
+                <span>📶</span>
+                <span class="time" id="time">12:00 PM</span>
+            </div>
+        </div>
+
+        <!-- Desktop Icons -->
+        <div class="app-icon" style="top: 60px; left: 30px;" onclick="openWindow('Google', 'https://www.google.com/webhp?igu=1')">
+            <div class="app-icon-img">🔍</div>
+            <div class="app-icon-label">Google</div>
+        </div>
+
+        <div class="app-icon" style="top: 60px; left: 130px;" onclick="openWindow('YouTube', 'https://www.youtube.com/embed/dQw4w9WgXcQ')">
+            <div class="app-icon-img">📺</div>
+            <div class="app-icon-label">YouTube</div>
+        </div>
+
+        <div class="app-icon" style="top: 60px; left: 230px;" onclick="openWindow('Calculator', 'https://www.desmos.com/scientific')">
+            <div class="app-icon-img">🧮</div>
+            <div class="app-icon-label">Calculator</div>
+        </div>
+
+        <div class="app-icon" style="top: 170px; left: 30px;" onclick="openWindow('Code Editor', 'https://codesandbox.io/s/')">
+            <div class="app-icon-img">💻</div>
+            <div class="app-icon-label">Code Editor</div>
+        </div>
+
+        <!-- Dock -->
+        <div class="dock">
+            <div class="dock-item" onclick="openWindow('Finder', 'https://www.wikipedia.org/')">📁</div>
+            <div class="dock-item" onclick="openWindow('Safari', 'https://www.bing.com/')">🌐</div>
+            <div class="dock-item" onclick="openWindow('Messages', 'https://web.whatsapp.com/')">💬</div>
+            <div class="dock-item" onclick="openWindow('Mail', 'https://mail.google.com/')">✉️</div>
+            <div class="dock-item" onclick="openWindow('Music', 'https://open.spotify.com/')">🎵</div>
+            <div class="dock-item" onclick="openWindow('Photos', 'https://unsplash.com/')">🖼️</div>
+            <div class="dock-item" onclick="showAllWindows()">⊞</div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" onclick="createNewWindow()">New Window</div>
+        <div class="context-menu-item" onclick="refreshDesktop()">Refresh</div>
+        <div class="context-menu-item" onclick="closeAllWindows()">Close All Windows</div>
+        <div class="context-menu-item" onclick="arrangeWindows()">Arrange Windows</div>
+    </div>
+
+    <script>
+        let windowCount = 0;
+        let activeWindow = null;
+        let zIndex = 100;
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Open Window Function
+        function openWindow(title, url) {
+            windowCount++;
+            const windowId = `window-${windowCount}`;
+            
+            const windowHtml = `
+                <div class="window" id="${windowId}" style="top: ${50 + (windowCount * 30)}px; left: ${50 + (windowCount * 30)}px; width: 800px; height: 500px;">
+                    <div class="window-header" onmousedown="startDrag(event, '${windowId}')">
+                        <div class="window-controls">
+                            <div class="window-btn close" onclick="closeWindow('${windowId}')"></div>
+                            <div class="window-btn minimize" onclick="minimizeWindow('${windowId}')"></div>
+                            <div class="window-btn maximize" onclick="maximizeWindow('${windowId}')"></div>
+                        </div>
+                        <div class="window-title">${title}</div>
+                    </div>
+                    <div class="window-content">
+                        <iframe src="${url}" frameborder="0"></iframe>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('desktop').insertAdjacentHTML('beforeend', windowHtml);
+            setActiveWindow(windowId);
+        }
+
+        // Window Controls
+        function closeWindow(windowId) {
+            const window = document.getElementById(windowId);
+            window.remove();
+        }
+
+        function minimizeWindow(windowId) {
+            const window = document.getElementById(windowId);
+            window.classList.toggle('minimized');
+        }
+
+        function maximizeWindow(windowId) {
+            const window = document.getElementById(windowId);
+            window.classList.toggle('maximized');
+        }
+
+        // Set Active Window
+        function setActiveWindow(windowId) {
+            document.querySelectorAll('.window').forEach(w => {
+                w.classList.remove('active');
+            });
+            const window = document.getElementById(windowId);
+            window.classList.add('active');
+            window.style.zIndex = ++zIndex;
+            activeWindow = window;
+        }
+
+        // Dragging
+        let isDragging = false;
+        let currentWindow = null;
+        let startX = 0;
+        let startY = 0;
+        let initialX = 0;
+        let initialY = 0;
+
+        function startDrag(e, windowId) {
+            currentWindow = document.getElementById(windowId);
+            if (currentWindow.classList.contains('maximized')) return;
+            
+            setActiveWindow(windowId);
+            isDragging = true;
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            initialX = currentWindow.offsetLeft;
+            initialY = currentWindow.offsetTop;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            currentWindow.style.left = initialX + dx + 'px';
+            currentWindow.style.top = initialY + dy + 'px';
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        // Context Menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            const contextMenu = document.getElementById('contextMenu');
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+        });
+
+        document.addEventListener('click', function() {
+            document.getElementById('contextMenu').style.display = 'none';
+        });
+
+        // Context Menu Functions
+        function createNewWindow() {
+            const url = prompt('Enter URL for new window:', 'https://');
+            if (url) {
+                openWindow('New Window', url);
+            }
+        }
+
+        function refreshDesktop() {
+            location.reload();
+        }
+
+        function closeAllWindows() {
+            document.querySelectorAll('.window').forEach(w => w.remove());
+        }
+
+        function arrangeWindows() {
+            const windows = document.querySelectorAll('.window');
+            windows.forEach((w, i) => {
+                w.style.top = 50 + (i * 30) + 'px';
+                w.style.left = 50 + (i * 30) + 'px';
+                w.classList.remove('maximized');
+                w.classList.remove('minimized');
+            });
+        }
+
+        function showAllWindows() {
+            document.querySelectorAll('.window').forEach(w => {
+                w.classList.remove('minimized');
+            });
+        }
+
+        // Click on window to activate
+        document.addEventListener('click', function(e) {
+            const window = e.target.closest('.window');
+            if (window) {
+                setActiveWindow(window.id);
+            }
+        });
+    </script>
+</body>
+</html>
